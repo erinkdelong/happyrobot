@@ -5,7 +5,7 @@ import re, os
 app = Flask(__name__)
 
 # load csv 
-file_path = '/Users/erindelong/HappyRobot/happyrobot/carrier_loads.csv'
+file_path = 'carrier_loads.csv'
 df = pd.read_csv(file_path)
 
 # function to process reference number-- AI sometimes does not process the user saying 'R E F'
