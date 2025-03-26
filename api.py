@@ -28,6 +28,10 @@ def search_loads(reference_number):
 
 ## API ##
 
+@app.route('/')
+def home():
+    return "hello world"
+
 @app.route('/loads/<string:reference_number>', methods=['GET'])
 # GET reference number
 def find_available_loads(reference_number):
@@ -42,6 +46,7 @@ def find_available_loads(reference_number):
 def verify_carrier(mc_number):
     # use the key
     pass
+
 
 
 
