@@ -28,7 +28,7 @@ def search_loads(reference_number):
 
 ## API ##
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def home():
     return "hello world"
 
