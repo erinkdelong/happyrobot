@@ -143,6 +143,7 @@ def process_trailer(trailer):
 def require_api_key(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        print("API_KEY from environment:", API_KEY)
         api_key = request.headers.get('X-HR-KEY')
         print("api key: ", api_key)
         if api_key != API_KEY:
