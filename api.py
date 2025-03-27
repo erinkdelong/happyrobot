@@ -123,7 +123,7 @@ def home():
 @app.route('/loads', methods=['GET', 'POST'])
 # GET reference number
 def find_available_loads():
-    params = request.args()
+    params = request.args
     has_ref_num = 'reference_number' in params
     has_lane_and_trailer = ('lane' in params) and ('trailer' in params)
     if not(has_ref_num) and not(has_lane_and_trailer):
