@@ -45,13 +45,14 @@ def search_loads(reference_number):
 def home():
     return "hello world"
 
-@app.route('/loads', methods=['GET'])
+@app.route('/loads', methods=['GET', 'POST'])
 # GET reference number
 def find_available_loads():
     reference_number = request.args.get('reference_number')
     if not(reference_number):
         return jsonify({"error": "reference_number parameter is required"}), 400
     reference_number = process_ref_num(reference_number)
+
     try: 
         result = search_loads(reference_number)
         if result:
