@@ -1,12 +1,14 @@
 from flask import Flask, jsonify, request
 import pandas as pd
 import re, os, requests
+from functools import wraps
 
 app = Flask(__name__)
 
 #####
 # Constants
 FMCSA_KEY = 'cdc33e44d693a3a58451898d4ec9df862c65b954'
+API_KEY = os.getenv("API_KEY")
 
 # Mapping of full state names to abbreviations
 STATE_ABBREV = {
@@ -136,6 +138,17 @@ def process_trailer(trailer):
         capitalized_trailer += capitalized_item
     return capitalized_trailer
 
+
+# Retrieve API key
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        api_key = request.headers.get('X-HR-KEY')
+        if api_key != API_KEY:
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Route for the home page
 @app.route('/', methods=['GET'])
 def home():
@@ -143,6 +156,7 @@ def home():
 
 # Route to find available loads based on reference number or lane and trailer
 @app.route('/loads', methods=['GET'])
+@require_api_key
 def find_available_loads():
     params = request.args
     has_ref_num = 'reference_number' in params
@@ -159,7 +173,6 @@ def find_available_loads():
                 return jsonify(result), 200
             else:
                 return jsonify({"error" : "Reference number not found"}), 404
-
 
         elif has_lane_and_trailer:
             lane = request.args.get('lane')
@@ -178,7 +191,7 @@ def find_available_loads():
 
 # Route to verify a carrier using its MC number
 @app.route('/carrier', methods=['GET'])
-# GET mc number from carrier
+@require_api_key
 def verify_carrier():
     mc_number = request.args.get('mc_number')
     if not(mc_number):
@@ -199,7 +212,6 @@ def verify_carrier():
         else:
             return jsonify({"error" : f"Issue getting response from FMCSA API: {response.status_code}"}), 500
     
-        
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
     
