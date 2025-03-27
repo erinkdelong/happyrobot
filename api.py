@@ -64,13 +64,19 @@ def verify_carrier(mc_number):
     try:
         # mc_number = process_mc_num(mc_number)
         # print(mc_number)
-        url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
+        # url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
+        url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/docket-number/{mc_number}?webKey={FMCSA_KEY}"
+
         response = requests.get(url)
 
         if response.status_code == 200:
             data = response.json()
-            isAllowedToOperate = data['content']['carrier']['allowedToOperate']
-            return jsonify({"allowedToOperate": isAllowedToOperate}), 200
+            isAllowedToOperate = data['content'][0]['carrier']['allowedToOperate']
+            if isAllowedToOperate:
+                legal_name = data["content"][0]["carrier"]["legalName"]
+                return jsonify({"legal_name": legal_name}), 200
+            else:
+                return jsonify({"error" : "mc number not allowed to operate"}), 200
         else:
             return jsonify({"error" : "mc number not found"}), 404
         
