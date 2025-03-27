@@ -33,12 +33,23 @@ def process_mc_num(mc_number):
     return 'MC' + numbers
 
 # function to search csv file
-def search_loads(reference_number):
+def search_loads_by_ref_num(reference_number):
     """Search for a row in the load information dataframe by reference number."""
     row = df[df['reference_number'] == reference_number]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
     return None
+
+def search_loads_by_lane_and_trailer(lane, trailer):
+    """Search for a row in the load information dataframe by lane and trailer."""
+    origin, destination = process_lane(lane)
+    row = df[(df['origin'] == origin) & (df['destination'] == destination) & (df['equipment_type'].str.contains(trailer))]
+    if not row.empty:
+        return row.to_dict(orient="records")[0] 
+    return None
+
+def process_lane(lane):
+    return
 
 
 @app.route('/', methods=['GET'])
@@ -48,19 +59,37 @@ def home():
 @app.route('/loads', methods=['GET', 'POST'])
 # GET reference number
 def find_available_loads():
-    reference_number = request.args.get('reference_number')
-    if not(reference_number):
-        return jsonify({"error": "reference_number parameter is required"}), 400
-    reference_number = process_ref_num(reference_number)
+    params = request.args()
+    has_ref_num = 'reference_number' in params
+    has_lane_and_trailer = ('lane' in params) and ('trailer' in params)
+    if not(has_ref_num) and not(has_lane_and_trailer):
+        return jsonify({"error": "reference_number or lane and trailer parameter is required"}), 400
+    if reference_number: 
+        reference_number = request.args.get('reference_number')
+        reference_number = process_ref_num(reference_number)
+        try: 
+            result = search_loads_by_ref_num(reference_number)
+            if result:
+                return jsonify(result), 200
+            else:
+                return jsonify({"error" : "Reference number not found"}), 404
+        except Exception as e:
+            return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-    try: 
-        result = search_loads(reference_number)
-        if result:
-            return jsonify(result), 200
-        else:
-            return jsonify({"error" : "Reference number not found"}), 404
-    except Exception as e:
-        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+    elif has_lane_and_trailer:
+        lane = request.args.get('lane')
+        trailer = request.args.get('trailer')
+
+        try: 
+            result = search_loads_by_lane_and_trailer(lane, trailer)
+            if result:
+                return jsonify(result), 200
+            else:
+                return jsonify({"error" : "Lane and trailer not found"}), 404
+        except Exception as e:
+            return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+
+    
 
 @app.route('/carrier', methods=['GET'])
 # GET mc number from carrier
