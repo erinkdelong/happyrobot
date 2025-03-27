@@ -35,7 +35,6 @@ def process_mc_num(mc_number):
 # function to search csv file
 def search_loads(reference_number):
     """Search for a row in the load information dataframe by reference number."""
-    reference_number = process_ref_num(reference_number)
     row = df[df['reference_number'] == reference_number]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
@@ -50,6 +49,7 @@ def home():
 # GET reference number
 def find_available_loads(reference_number):
     try: 
+        reference_number = process_ref_num(reference_number)
         result = search_loads(reference_number)
         if result:
             return jsonify(result), 200
