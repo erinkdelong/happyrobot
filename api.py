@@ -4,9 +4,11 @@ import re, os, requests
 
 app = Flask(__name__)
 
-# constants
+#####
+# Constants
 FMCSA_KEY = 'cdc33e44d693a3a58451898d4ec9df862c65b954'
 
+# Mapping of full state names to abbreviations
 STATE_ABBREV = {
     'Alabama': 'AL',
     'Alaska': 'AK',
@@ -60,48 +62,41 @@ STATE_ABBREV = {
     'Wyoming': 'WY'
 }
 
-## BEGIN: loading datasets ##
-# load csv 
-file_path = 'carrier_loads.csv'
-df = pd.read_csv(file_path)
+# Path to the CSV file containing load information and load information dataframe
+LOADS_FILE_PATH = 'carrier_loads.csv'
+LOADS_INFO_DF = pd.read_csv(LOADS_FILE_PATH)
 
-# # load carrier information for mc number verification
-# mc_response = requests.get(f"https://mobile.fmcsa.dot.gov/qc/services/carriers/name/greyhound?webKey={FMCSA_KEY}")
-# mc_data = mc_response.json()
-# # mc_df = pd.DataFrame(mc_data['content'])
-# mc_df = pd.json_normalize(mc_data['content'])
-# print(mc_df.info())
-# print(type(mc_df['carrier.allowedToOperate']))
+#####
 
-## END: loading datasets ##
-
-# function to process reference number-- AI sometimes does not process the user saying 'R E F'
+# Function to process reference number and handle string variations (e.g., 'R E F' vs 'REF')
 def process_ref_num(reference_number):
     numbers =  ''.join(re.findall(r'\d+', reference_number))
     return 'REF' + numbers
 
-# function to process mc number-- AI sometimes does not process the user saying 'M C'
+# Function to process MC number and handle variations (e.g., 'M C' vs 'MC')
 def process_mc_num(mc_number):
     numbers =  ''.join(re.findall(r'\d+', mc_number))
     return 'MC' + numbers
 
-# function to search csv file
+# Function to search loads by reference number
 def search_loads_by_ref_num(reference_number):
     """Search for a row in the load information dataframe by reference number."""
-    row = df[df['reference_number'] == reference_number]
+    row = LOADS_INFO_DF[LOADS_INFO_DF['reference_number'] == reference_number]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
     return None
 
+# Function to search loads by lane and trailer type
 def search_loads_by_lane_and_trailer(lane, trailer):
     """Search for a row in the load information dataframe by lane and trailer."""
     origin, destination = process_lane(lane)
     trailer = process_trailer(trailer)
-    row = df[(df['origin'] == origin) & (df['destination'] == destination) & (df['equipment_type'].str.contains(trailer))]
+    row = LOADS_INFO_DF[(LOADS_INFO_DF['origin'] == origin) & (LOADS_INFO_DF['destination'] == destination) & (LOADS_INFO_DF['equipment_type'].str.contains(trailer))]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
     return None
 
+# Function to process the lane input, extracting city and state
 def process_lane(lane):
     """Denver, Colorado to Detroit, Michigan"""
     print(f"Type of lane immediaely after calling process lane: {type(lane)}")
@@ -129,6 +124,7 @@ def process_lane(lane):
 
     return locations[0], locations[1]
 
+# Function to process the trailer type, ensuring proper case formatting
 def process_trailer(trailer):
     lowercase_trailer = trailer.lower()
     trailer_list = lowercase_trailer.split()
@@ -140,64 +136,56 @@ def process_trailer(trailer):
         capitalized_trailer += capitalized_item
     return capitalized_trailer
 
-
-
+# Route for the home page
 @app.route('/', methods=['GET'])
 def home():
-    return "hello world"
+    return "Welcome to Erin's HappyRobot Trucking Project"
 
-@app.route('/loads', methods=['GET', 'POST'])
-# GET reference number
+# Route to find available loads based on reference number or lane and trailer
+@app.route('/loads', methods=['GET'])
 def find_available_loads():
     params = request.args
     has_ref_num = 'reference_number' in params
     has_lane_and_trailer = ('lane' in params) and ('trailer' in params)
     if not(has_ref_num) and not(has_lane_and_trailer):
         return jsonify({"error": "reference_number or lane and trailer parameter is required"}), 400
-    if has_ref_num: 
-        reference_number = request.args.get('reference_number')
-        reference_number = process_ref_num(reference_number)
-        try: 
+    
+    try:
+        if has_ref_num: 
+            reference_number = request.args.get('reference_number')
+            reference_number = process_ref_num(reference_number)
             result = search_loads_by_ref_num(reference_number)
             if result:
                 return jsonify(result), 200
             else:
                 return jsonify({"error" : "Reference number not found"}), 404
-        except Exception as e:
-            return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-    elif has_lane_and_trailer:
-        lane = request.args.get('lane')
-        # raise ValueError(f"Lane {type(lane)}")
-        # lane = process_lane(lane)
-        trailer = request.args.get('trailer')
 
-        try: 
+        elif has_lane_and_trailer:
+            lane = request.args.get('lane')
+            # raise ValueError(f"Lane {type(lane)}")
+            # lane = process_lane(lane)
+            trailer = request.args.get('trailer')
             print(f"Type of lane immediaely befire calling process lane: {type(lane)}")
             result = search_loads_by_lane_and_trailer(lane, trailer)
             if result:
                 return jsonify(result), 200
             else:
                 return jsonify({"error" : "Lane and trailer not found"}), 404
-        except Exception as e:
-            return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+            
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-    
-
+# Route to verify a carrier using its MC number
 @app.route('/carrier', methods=['GET'])
 # GET mc number from carrier
 def verify_carrier():
     mc_number = request.args.get('mc_number')
     if not(mc_number):
         return jsonify({"error": "mc_number parameter is required"}), 400
-    print("mc_number from verify_carrier(): ", mc_number)
 
     try:
-        # mc_number = process_mc_num(mc_number)
-        # print(mc_number)
-        # url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
         url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/docket-number/{mc_number}?webKey={FMCSA_KEY}"
-
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -209,15 +197,13 @@ def verify_carrier():
             else:
                 return jsonify({"verified" : False}), 200
         else:
-            return jsonify({"error" : "Issue getting response"}), 404
+            return jsonify({"error" : f"Issue getting response from FMCSA API: {response.status_code}"}), 500
     
         
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
     
-
-
+# Run Flask app
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
 
-# necessary APIs: GET reference number, GET mc number
