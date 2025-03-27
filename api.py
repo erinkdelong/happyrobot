@@ -63,23 +63,27 @@ def find_available_loads(reference_number):
 def verify_carrier():
     try:
         mc_number = requests.args.get('mc_number')
-        # mc_number = process_mc_num(mc_number)
-        # print(mc_number)
-        # url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
-        url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/docket-number/{mc_number}?webKey={FMCSA_KEY}"
+        print("mc_number from verify_carrier(): ", mc_number)
+        if mc_number:
+            # mc_number = process_mc_num(mc_number)
+            # print(mc_number)
+            # url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
+            url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/docket-number/{mc_number}?webKey={FMCSA_KEY}"
 
-        response = requests.get(url)
+            response = requests.get(url)
 
-        if response.status_code == 200:
-            data = response.json()
-            isAllowedToOperate = data['content'][0]['carrier']['allowedToOperate']
-            if isAllowedToOperate:
-                legal_name = data["content"][0]["carrier"]["legalName"]
-                return jsonify({'verified': True, "legal_name": legal_name}), 200
+            if response.status_code == 200:
+                data = response.json()
+                isAllowedToOperate = data['content'][0]['carrier']['allowedToOperate']
+                if isAllowedToOperate:
+                    legal_name = data["content"][0]["carrier"]["legalName"]
+                    return jsonify({'verified': True, "legal_name": legal_name}), 200
+                else:
+                    return jsonify({"verified" : False}), 200
             else:
-                return jsonify({"verified" : False}), 200
+                return jsonify({"error" : "Issue getting response"}), 404
         else:
-            return jsonify({"error" : f"mc number{mc_number} not found"}), 404
+            return jsonify({"error" : "mc number not found"}), 404
         
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
