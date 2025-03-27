@@ -45,9 +45,12 @@ def search_loads(reference_number):
 def home():
     return "hello world"
 
-@app.route('/loads/<string:reference_number>', methods=['GET'])
+@app.route('/loads', methods=['GET'])
 # GET reference number
-def find_available_loads(reference_number):
+def find_available_loads():
+    reference_number = request.args.get('reference_number')
+    if not(reference_number):
+        return jsonify({"error": "reference_number parameter is required"}), 400
     try: 
         reference_number = process_ref_num(reference_number)
         result = search_loads(reference_number)
