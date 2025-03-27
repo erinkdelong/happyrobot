@@ -101,10 +101,7 @@ def search_loads_by_lane_and_trailer(lane, trailer):
 # Function to process the lane input, extracting city and state
 def process_lane(lane):
     """Denver, Colorado to Detroit, Michigan"""
-    print(f"Type of lane immediaely after calling process lane: {type(lane)}")
 
-    if not isinstance(lane, str):
-        raise ValueError(f"Expected a string input for 'lane' {type(lane)}")
     pattern = r'\b\w+,\s\w+\b'
     lowercase_lane = lane.lower()
     matches = re.findall(pattern, lowercase_lane)
@@ -115,8 +112,6 @@ def process_lane(lane):
         city = city.capitalize()
         state = state.strip()
         state = state.capitalize()
-        print("city: ", city)
-        print("state: ", state)
         if len(state) > 2:
             state = STATE_ABBREV[state]
         else:
@@ -181,7 +176,6 @@ def find_available_loads():
             # raise ValueError(f"Lane {type(lane)}")
             # lane = process_lane(lane)
             trailer = request.args.get('trailer')
-            print(f"Type of lane immediaely befire calling process lane: {type(lane)}")
             result = search_loads_by_lane_and_trailer(lane, trailer)
             if result:
                 return jsonify(result), 200
