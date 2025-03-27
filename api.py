@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import pandas as pd
 import re, os, requests
 
@@ -61,11 +61,11 @@ def find_available_loads(reference_number):
 @app.route('/carrier', methods=['GET'])
 # GET mc number from carrier
 def verify_carrier():
-    mc_number = requests.args.get('mc_number')
+    mc_number = request.args.get('mc_number')
     if not(mc_number):
         return jsonify({"error": "mc_number parameter is required"}), 400
     print("mc_number from verify_carrier(): ", mc_number)
-    
+
     try:
         # mc_number = process_mc_num(mc_number)
         # print(mc_number)
