@@ -60,8 +60,9 @@ def find_available_loads(reference_number):
 
 @app.route('/carrier/<string:mc_number>', methods=['GET'])
 # GET mc number from carrier
-def verify_carrier(mc_number):
+def verify_carrier():
     try:
+        mc_number = requests.args.get('mc_number')
         # mc_number = process_mc_num(mc_number)
         # print(mc_number)
         # url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
@@ -82,6 +83,7 @@ def verify_carrier(mc_number):
         
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+    
 
 
 if __name__ == "__main__":
