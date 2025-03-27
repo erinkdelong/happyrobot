@@ -108,22 +108,30 @@ def process_lane(lane):
 
     if not isinstance(lane, str):
         raise ValueError(f"Expected a string input for 'lane' {type(lane)}")
-    
     pattern = r'\b\w+,\s\w+\b'
-    matches = re.findall(pattern, lane)
+    lowercase_lane = lane.lower()
+    matches = re.findall(pattern, lowercase_lane)
     locations = []
     for location in matches:
         city, state = location.split(',')
+        city = city.strip()
+        city = city.capitalize()
         state = state.strip()
+        state = state.capitalize()
+        print("city: ", city)
+        print("state: ", state)
         if len(state) > 2:
             state = STATE_ABBREV[state]
+        else:
+            state =  state.upper()
         city_state_str = city + ', ' + state
         locations.append(city_state_str)
 
     return locations[0], locations[1]
 
 def process_trailer(trailer):
-    trailer_list = trailer.split()
+    lowercase_trailer = trailer.lower()
+    trailer_list = lowercase_trailer.split()
     capitalized_trailer = ""
     for item in trailer_list:
         capitalized_item = item.capitalize()
