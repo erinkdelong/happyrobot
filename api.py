@@ -51,8 +51,8 @@ def find_available_loads():
     reference_number = request.args.get('reference_number')
     if not(reference_number):
         return jsonify({"error": "reference_number parameter is required"}), 400
+    reference_number = process_ref_num(reference_number)
     try: 
-        reference_number = process_ref_num(reference_number)
         result = search_loads(reference_number)
         if result:
             return jsonify(result), 200
