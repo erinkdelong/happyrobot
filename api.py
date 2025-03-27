@@ -58,7 +58,7 @@ def find_available_loads(reference_number):
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-@app.route('/carrier/<string:mc_number>', methods=['GET'])
+@app.route('/carrier', methods=['GET'])
 # GET mc number from carrier
 def verify_carrier():
     try:
