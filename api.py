@@ -4,8 +4,61 @@ import re, os, requests
 
 app = Flask(__name__)
 
-# keys
+# constants
 FMCSA_KEY = 'cdc33e44d693a3a58451898d4ec9df862c65b954'
+
+STATE_ABBREV = {
+    'Alabama': 'AL',
+    'Alaska': 'AK',
+    'Arizona': 'AZ',
+    'Arkansas': 'AR',
+    'California': 'CA',
+    'Colorado': 'CO',
+    'Connecticut': 'CT',
+    'Delaware': 'DE',
+    'Florida': 'FL',
+    'Georgia': 'GA',
+    'Hawaii': 'HI',
+    'Idaho': 'ID',
+    'Illinois': 'IL',
+    'Indiana': 'IN',
+    'Iowa': 'IA',
+    'Kansas': 'KS',
+    'Kentucky': 'KY',
+    'Louisiana': 'LA',
+    'Maine': 'ME',
+    'Maryland': 'MD',
+    'Massachusetts': 'MA',
+    'Michigan': 'MI',
+    'Minnesota': 'MN',
+    'Mississippi': 'MS',
+    'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Pennsylvania': 'PA',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
+    'Wyoming': 'WY'
+}
 
 ## BEGIN: loading datasets ##
 # load csv 
@@ -49,7 +102,18 @@ def search_loads_by_lane_and_trailer(lane, trailer):
     return None
 
 def process_lane(lane):
-    return
+    """Denver, Colorado to Detroit, Michigan"""
+    pattern = r'\b\w+,\s\w+\b'
+    matches = re.findall(pattern, lane)
+    locations = []
+    for location in matches:
+        city, state = location.split(',')
+        if len(state) > 2:
+            state = STATE_ABBREV[state]
+        city_state_str = city + ', ' + state
+        locations.append(city_state_str)
+
+    return locations[0], locations[1]
 
 
 @app.route('/', methods=['GET'])
