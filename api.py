@@ -35,7 +35,7 @@ def process_mc_num(mc_number):
 # function to search csv file
 def search_loads(reference_number):
     """Search for a row in the load information dataframe by reference number."""
-    reference_number = process_ref_num(reference_number)
+    # reference_number = process_ref_num(reference_number)
     row = df[df['reference_number'] == reference_number]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
@@ -62,7 +62,8 @@ def find_available_loads(reference_number):
 # GET mc number from carrier
 def verify_carrier(mc_number):
     try:
-        mc_number = process_mc_num(mc_number)
+        # mc_number = process_mc_num(mc_number)
+        # print(mc_number)
         url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
         response = requests.get(url)
 
