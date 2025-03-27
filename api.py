@@ -78,7 +78,7 @@ def verify_carrier(mc_number):
             else:
                 return jsonify({"verified" : False}), 200
         else:
-            return jsonify({"error" : "mc number not found"}), 404
+            return jsonify({"error" : f"mc number{mc_number} not found"}), 404
         
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
