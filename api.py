@@ -96,6 +96,7 @@ def search_loads_by_ref_num(reference_number):
 def search_loads_by_lane_and_trailer(lane, trailer):
     """Search for a row in the load information dataframe by lane and trailer."""
     origin, destination = process_lane(lane)
+    trailer = process_trailer(trailer)
     row = df[(df['origin'] == origin) & (df['destination'] == destination) & (df['equipment_type'].str.contains(trailer))]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
@@ -120,6 +121,17 @@ def process_lane(lane):
         locations.append(city_state_str)
 
     return locations[0], locations[1]
+
+def process_trailer(trailer):
+    trailer_list = trailer.split()
+    capitalized_trailer = ""
+    for item in trailer_list:
+        capitalized_item = item.capitalize()
+        if len(capitalized_trailer) > 0:
+            capitalized_trailer += " "  
+        capitalized_trailer += capitalized_item
+    return capitalized_trailer
+
 
 
 @app.route('/', methods=['GET'])
