@@ -74,9 +74,9 @@ def verify_carrier(mc_number):
             isAllowedToOperate = data['content'][0]['carrier']['allowedToOperate']
             if isAllowedToOperate:
                 legal_name = data["content"][0]["carrier"]["legalName"]
-                return jsonify({"legal_name": legal_name}), 200
+                return jsonify({'verified': True, "legal_name": legal_name}), 200
             else:
-                return jsonify({"error" : "mc number not allowed to operate"}), 200
+                return jsonify({"verified" : False}), 200
         else:
             return jsonify({"error" : "mc number not found"}), 404
         
