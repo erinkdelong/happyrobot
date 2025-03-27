@@ -103,11 +103,17 @@ def search_loads_by_lane_and_trailer(lane, trailer):
 
 def process_lane(lane):
     """Denver, Colorado to Detroit, Michigan"""
+    print(f"Type of lane immediaely after calling process lane: {type(lane)}")
+
+    if not isinstance(lane, str):
+        raise ValueError(f"Expected a string input for 'lane' {type(lane)}")
+    
     pattern = r'\b\w+,\s\w+\b'
     matches = re.findall(pattern, lane)
     locations = []
     for location in matches:
         city, state = location.split(',')
+        state = state.strip()
         if len(state) > 2:
             state = STATE_ABBREV[state]
         city_state_str = city + ', ' + state
@@ -128,7 +134,7 @@ def find_available_loads():
     has_lane_and_trailer = ('lane' in params) and ('trailer' in params)
     if not(has_ref_num) and not(has_lane_and_trailer):
         return jsonify({"error": "reference_number or lane and trailer parameter is required"}), 400
-    if reference_number: 
+    if has_ref_num: 
         reference_number = request.args.get('reference_number')
         reference_number = process_ref_num(reference_number)
         try: 
@@ -142,9 +148,12 @@ def find_available_loads():
 
     elif has_lane_and_trailer:
         lane = request.args.get('lane')
+        # raise ValueError(f"Lane {type(lane)}")
+        # lane = process_lane(lane)
         trailer = request.args.get('trailer')
 
         try: 
+            print(f"Type of lane immediaely befire calling process lane: {type(lane)}")
             result = search_loads_by_lane_and_trailer(lane, trailer)
             if result:
                 return jsonify(result), 200
