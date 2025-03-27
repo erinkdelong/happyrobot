@@ -35,6 +35,7 @@ def process_mc_num(mc_number):
 # function to search csv file
 def search_loads(reference_number):
     """Search for a row in the load information dataframe by reference number."""
+    reference_number = process_ref_num(reference_number)
     row = df[df['reference_number'] == reference_number]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
@@ -48,16 +49,20 @@ def home():
 @app.route('/loads/<string:reference_number>', methods=['GET'])
 # GET reference number
 def find_available_loads(reference_number):
-    result = search_loads(reference_number)
-    if result:
-        return jsonify(result), 200
-    else:
-        return jsonify({"error" : "Reference number not found"}), 404
+    try: 
+        result = search_loads(reference_number)
+        if result:
+            return jsonify(result), 200
+        else:
+            return jsonify({"error" : "Reference number not found"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 @app.route('/carrier/<string:mc_number>', methods=['GET'])
 # GET mc number from carrier
 def verify_carrier(mc_number):
     try:
+        mc_number = process_mc_num(mc_number)
         url = f"https://mobile.fmcsa.dot.gov/qc/services/carriers/{mc_number}?webKey={FMCSA_KEY}"
         response = requests.get(url)
 
