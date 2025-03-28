@@ -2,10 +2,10 @@ from flask import Flask, jsonify, request
 import pandas as pd
 import re, os, requests
 from functools import wraps
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 app = Flask(__name__)
-load_dotenv()
+# load_dotenv()
 
 #####
 # Constants
