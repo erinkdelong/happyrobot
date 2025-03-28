@@ -141,6 +141,9 @@ def require_api_key(f):
         api_key = request.headers.get('X-HR-KEY')
         print("api key in finc: ", api_key)
         print("API_KEY: ", API_KEY)
+        print("api key in finc: ", FMCSA_KEY)
+        print("FMCSA_KEY: ", FMCSA_KEY)
+
         if api_key == None or API_KEY == None:
             return jsonify({"error": "Key is None"}), 401
         if api_key != API_KEY:
