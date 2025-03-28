@@ -10,6 +10,9 @@ app = Flask(__name__)
 FMCSA_KEY = os.getenv("FMCSA_KEY")
 API_KEY = os.getenv("API_KEY")
 
+print("FMCSA_KEY: ", FMCSA_KEY)
+print("API_KEY: ", API_KEY)
+
 # Mapping of full state names to abbreviations
 STATE_ABBREV = {
     'Alabama': 'AL',
