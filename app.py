@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 #####
 # Constants
-FMCSA_KEY = 'cdc33e44d693a3a58451898d4ec9df862c65b954'
+FMCSA_KEY = os.getenv("FMCSA_KEY")
 API_KEY = os.getenv("API_KEY")
 
 # Mapping of full state names to abbreviations
