@@ -2,13 +2,17 @@ from flask import Flask, jsonify, request
 import pandas as pd
 import re, os, requests
 from functools import wraps
+from dotenv import load_dotenv
 
 app = Flask(__name__)
+load_dotenv()
 
 #####
 # Constants
 FMCSA_KEY = os.getenv("FMCSA_KEY")
 API_KEY = os.getenv("API_KEY")
+
+
 
 # Mapping of full state names to abbreviations
 STATE_ABBREV = {
