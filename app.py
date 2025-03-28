@@ -83,6 +83,7 @@ def process_mc_num(mc_number):
 # Function to search loads by reference number
 def search_loads_by_ref_num(reference_number):
     """Search for a row in the load information dataframe by reference number."""
+    reference_number = process_ref_num(reference_number)
     row = LOADS_INFO_DF[LOADS_INFO_DF['reference_number'] == reference_number]
     if not row.empty:
         return row.to_dict(orient="records")[0] 
@@ -164,7 +165,6 @@ def find_available_loads():
     try:
         if has_ref_num: 
             reference_number = request.args.get('reference_number')
-            reference_number = process_ref_num(reference_number)
             result = search_loads_by_ref_num(reference_number)
             if result:
                 return jsonify(result), 200
@@ -173,8 +173,6 @@ def find_available_loads():
 
         elif has_lane_and_trailer:
             lane = request.args.get('lane')
-            # raise ValueError(f"Lane {type(lane)}")
-            # lane = process_lane(lane)
             trailer = request.args.get('trailer')
             result = search_loads_by_lane_and_trailer(lane, trailer)
             if result:
