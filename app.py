@@ -10,9 +10,6 @@ app = Flask(__name__)
 FMCSA_KEY = os.getenv("FMCSA_KEY")
 API_KEY = os.getenv("API_KEY")
 
-print("FMCSA_KEY: ", FMCSA_KEY)
-print("API_KEY: ", API_KEY)
-
 # Mapping of full state names to abbreviations
 STATE_ABBREV = {
     'Alabama': 'AL',
@@ -142,6 +139,8 @@ def require_api_key(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('X-HR-KEY')
+        print("api key in finc: ", api_key)
+        print("API_KEY: ", API_KEY)
         if api_key == None or API_KEY == None:
             return jsonify({"error": "Key is None"}), 401
         if api_key != API_KEY:
