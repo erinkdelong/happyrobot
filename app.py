@@ -206,7 +206,7 @@ def verify_carrier():
             else:
                 return jsonify({"verified" : False}), 200
         else:
-            return jsonify({"error" : f"Issue getting response from FMCSA API: {response.status_code}"}), 500
+            return jsonify({"error" : f"Cannot find MC number: {mc_number}"}), 404
     
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
